@@ -1,7 +1,14 @@
 import { memo, useEffect, useState } from "react";
 import { faker } from "@faker-js/faker";
+import {
+  HiSun,
+  HiMoon,
+  HiOutlinePencilAlt,
+  HiOutlineTrash,
+  HiOutlineSave,
+} from "react-icons/hi";
 import { usePosts, PostProvider } from "./PostProvider";
-import Test from "./Test";
+import { HiCircleStack, HiRocketLaunch } from "react-icons/hi2";
 
 function createRandomPost() {
   return {
@@ -12,21 +19,18 @@ function createRandomPost() {
 
 function App() {
   const [isFakeDark, setIsFakeDark] = useState(false);
-  // Whenever `isFakeDark` changes, we toggle the `fake-dark-mode` class on the HTML element (see in "Elements" dev tool).
-  useEffect(
-    function () {
-      document.documentElement.classList.toggle("fake-dark-mode");
-    },
-    [isFakeDark]
-  );
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("fake-dark-mode");
+  }, [isFakeDark]);
 
   return (
     <section>
       <button
-        onClick={() => setIsFakeDark((isFakeDark) => !isFakeDark)}
-        className="btn-fake-dark-mode"
+        onClick={() => setIsFakeDark(!isFakeDark)}
+        className='btn-fake-dark-mode'
       >
-        {isFakeDark ? "☀️" : "🌙"}
+        {isFakeDark ? <HiSun /> : <HiMoon />}
       </button>
 
       <PostProvider>
@@ -39,19 +43,25 @@ function App() {
   );
 }
 
-// prop drilling in posts, searchQuery, setSearchQuery
 function Header() {
-  // 3)CONSUMING CONTEXT VALUE
   const { onClearPosts } = usePosts();
   return (
     <header>
       <h1>
-        <span>⚛️</span>The Atomic Blog
+        <span className='icon'>
+          <HiCircleStack />
+        </span>
+        <span> TechJournal</span>
       </h1>
-      <div>
+      <div className='mini-header'>
         <Results />
         <SearchPosts />
-        <button onClick={onClearPosts}>Clear posts</button>
+        <button onClick={onClearPosts}>
+          <span>Delete All Articles</span>
+          <span className='icon'>
+            <HiOutlineTrash />
+          </span>
+        </button>
       </div>
     </header>
   );
@@ -63,17 +73,24 @@ function SearchPosts() {
     <input
       value={searchQuery}
       onChange={(e) => setSearchQuery(e.target.value)}
-      placeholder="Search posts..."
+      placeholder='Search Articles...'
     />
   );
 }
 
 function Results() {
   const { posts } = usePosts();
-  return <p>🚀 {posts.length} atomic posts found</p>;
+  return (
+    <p>
+      {" "}
+      {posts.length} Articles Are Found{" "}
+      <span>
+        <HiRocketLaunch />
+      </span>
+    </p>
+  );
 }
 
-// prop drilling in posts and onAddPost
 const Main = memo(function Main() {
   return (
     <main>
@@ -82,7 +99,7 @@ const Main = memo(function Main() {
     </main>
   );
 });
-// prop drilling in posts
+
 function Posts() {
   return (
     <section>
@@ -109,14 +126,19 @@ function FormAddPost() {
       <input
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        placeholder="Post title"
+        placeholder='Article Title'
       />
       <textarea
         value={body}
         onChange={(e) => setBody(e.target.value)}
-        placeholder="Post body"
+        placeholder='Article Body'
       />
-      <button>Add post</button>
+      <button className='btn-form'>
+        <span>Add Article</span>
+        <span className='icon'>
+          <HiOutlineSave />
+        </span>
+      </button>
     </form>
   );
 }
@@ -124,35 +146,30 @@ function FormAddPost() {
 function List() {
   const { posts } = usePosts();
   return (
-    <>
-      <ul>
-        {posts.map((post, i) => (
-          <li key={i}>
-            <h3>{post.title}</h3>
-            <p>{post.body}</p>
-          </li>
-        ))}
-      </ul>
-      <Test />
-    </>
+    <ul>
+      {posts.map((post, i) => (
+        <li key={i}>
+          <h3>{post.title}</h3>
+          <p>{post.body}</p>
+        </li>
+      ))}
+    </ul>
   );
 }
 
 function Archive() {
   const { onAddPost } = usePosts();
-  // Here we don't need the setter function. We're only using state to store these posts because the callback function passed into useState (which generates the posts) is only called once, on the initial render. So we use this trick as an optimization technique, because if we just used a regular variable, these posts would be re-created on every render. We could also move the posts outside the components, but I wanted to show you this trick 😉
   const [posts] = useState(() =>
-    // 💥 WARNING: This might make your computer slow! Try a smaller `length` first
-    Array.from({ length: 10000 }, () => createRandomPost())
+    Array.from({ length: 100 }, () => createRandomPost())
   );
 
   const [showArchive, setShowArchive] = useState(false);
 
   return (
     <aside>
-      <h2>Post archive</h2>
-      <button onClick={() => setShowArchive((s) => !s)}>
-        {showArchive ? "Hide archive posts" : "Show archive posts"}
+      <h2>Article Archive</h2>
+      <button onClick={() => setShowArchive(!showArchive)}>
+        {showArchive ? "Hide Archive Articles" : "Show Archive Articles"}
       </button>
 
       {showArchive && (
@@ -162,7 +179,12 @@ function Archive() {
               <p>
                 <strong>{post.title}:</strong> {post.body}
               </p>
-              <button onClick={() => onAddPost(post)}>Add as new post</button>
+              <button onClick={() => onAddPost(post)}>
+                <span>Add New Article</span>
+                <span className='icon'>
+                  <HiOutlinePencilAlt />
+                </span>
+              </button>
             </li>
           ))}
         </ul>
@@ -172,7 +194,7 @@ function Archive() {
 }
 
 function Footer() {
-  return <footer>&copy; by The Atomic Blog ✌️</footer>;
+  return <footer>&copy; Articles App by Ziad Moataz 2024</footer>;
 }
 
 export default App;
